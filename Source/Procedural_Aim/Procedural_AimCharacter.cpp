@@ -2,13 +2,16 @@
 
 #include "Procedural_AimCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "IKAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Weapon/BaseWeapon.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,6 +52,7 @@ AProcedural_AimCharacter::AProcedural_AimCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	bIsAiming = false;
 }
 
 void AProcedural_AimCharacter::BeginPlay()
@@ -64,6 +68,14 @@ void AProcedural_AimCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	/* Spawn the defaultWeapon and attach to the mesh*/
+	EquipWeapon(SpawnDefaultWeapon());
+
+	AnimIK = Cast<UIKAnimInstance>(GetMesh()->GetAnimInstance());
+
+	
+
+	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -124,6 +136,44 @@ void AProcedural_AimCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void AProcedural_AimCharacter::SetAiming(bool IsAiming)
+{
+	bIsAiming = IsAiming;
+	if (AnimIK)
+	{
+		AnimIK->SetAiming(bIsAiming);
+	}
+}
+
+ABaseWeapon* AProcedural_AimCharacter::SpawnDefaultWeapon()
+{
+	if (DefaultWeaponClass)
+	{
+		// Spawn the TSub Class of Variable
+		return TP_Gun = GetWorld()->SpawnActor<ABaseWeapon>(DefaultWeaponClass);
+	}
+	return nullptr;
+}
+
+void AProcedural_AimCharacter::EquipWeapon(ABaseWeapon* WeaponToEquipped)
+{
+	if (WeaponToEquipped)
+	{
+		// Get the hand socket
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("GunHolder"));
+		if (HandSocket)
+		{
+			// Attach the weapon to the hand socket RightHandSocket
+			HandSocket->AttachActor(WeaponToEquipped, GetMesh());
+
+		}
+	}
+}
+
+void AProcedural_AimCharacter::Fire()
+{
+	
+}
 
 
 
