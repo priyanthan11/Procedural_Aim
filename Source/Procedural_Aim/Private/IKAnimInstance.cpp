@@ -13,6 +13,7 @@ UIKAnimInstance::UIKAnimInstance()
 	AimAlpha = 0.f;
 	bInterpAiming = false;
 	bIsAiming = false;
+	bInterpRelativeHand = false;
 }
 
 void UIKAnimInstance::NativeBeginPlay()
@@ -23,26 +24,30 @@ void UIKAnimInstance::NativeBeginPlay()
 	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), );
 	//BaseWeapon = Character->GetBaseWeapon();
 	
-	
-}
-
-void UIKAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
-{
-	Super::NativeUpdateAnimation(DeltaSeconds);
 	if (Character)
 	{
 		FTimerHandle TSetSightTransform;
 		FTimerHandle TSetRelativeHandTransform;
 
-		GetWorld()->GetTimerManager().SetTimer(TSetSightTransform, this, &UIKAnimInstance::setSightTransform, 0.3f, false);
-		GetWorld()->GetTimerManager().SetTimer(TSetRelativeHandTransform, this, &UIKAnimInstance::setRelativeHandTransform, 0.3f, false);
+		GetWorld()->GetTimerManager().SetTimer(TSetSightTransform, this, &UIKAnimInstance::setSightTransform, 0.3f, true);
+		GetWorld()->GetTimerManager().SetTimer(TSetRelativeHandTransform, this, &UIKAnimInstance::setRelativeHandTransform, 0.3f, true);
 
+	}
+}
 
-		if (bInterpAiming)
-		{
-			interpAiming();
-		}
+void UIKAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+{
+	Super::NativeUpdateAnimation(DeltaSeconds);
 
+	if (!Character) return;
+	
+	if (bInterpAiming)
+	{
+		interpAiming();
+	}
+	if (bInterpRelativeHand)
+	{
+		interpRelativehand();
 	}
 	
 }
@@ -76,11 +81,21 @@ void UIKAnimInstance::setRelativeHandTransform()
 		RelativeHandTransform = UKismetMathLibrary::MakeRelativeTransform(OpticSocketTransform, MeshTransform);
 
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to get current optic"));
-	}
+
 	
+}
+
+void UIKAnimInstance::setFinalHandTransform()
+{
+	if (Character->GetBaseWeapon()->GetCurrentOptic())
+	{
+		FTransform OpticSocketTransform = Character->GetBaseWeapon()->GetCurrentOptic()->GetSocketTransform(FName("S_Aim"));
+		FTransform MeshTransform = Character->GetMesh()->GetSocketTransform(FName("hand_r"));
+
+		FinalHandTransform = UKismetMathLibrary::MakeRelativeTransform(OpticSocketTransform, MeshTransform);
+
+	}
+
 }
 
 void UIKAnimInstance::interpAiming()
@@ -88,8 +103,17 @@ void UIKAnimInstance::interpAiming()
 	AimAlpha = UKismetMathLibrary::FInterpTo(AimAlpha, static_cast<float>(bIsAiming), GetWorld()->GetDeltaSeconds(),10.0f);
 	if (AimAlpha >=1.0f || AimAlpha <= 0.0f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Alpha: %f"),AimAlpha);
 		bInterpAiming = false;
+	}
+}
+
+void UIKAnimInstance::interpRelativehand()
+{
+	RelativeHandTransform = UKismetMathLibrary::TInterpTo(RelativeHandTransform, FinalHandTransform, GetWorld()->GetDeltaSeconds(), 10.0f);
+	if (RelativeHandTransform.Equals(FinalHandTransform))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Equals"));
+		bInterpRelativeHand = false;
 	}
 }
 
@@ -100,4 +124,10 @@ void UIKAnimInstance::SetAiming(bool IsAiming)
 		bIsAiming = IsAiming;
 		bInterpAiming = true;
 	}
+}
+
+void UIKAnimInstance::CycledOptic()
+{
+	setFinalHandTransform();
+	bInterpRelativeHand = true;
 }

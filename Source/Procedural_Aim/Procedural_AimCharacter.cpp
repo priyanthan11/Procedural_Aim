@@ -78,6 +78,12 @@ void AProcedural_AimCharacter::BeginPlay()
 	
 }
 
+void AProcedural_AimCharacter::CycleOptic()
+{
+	TP_Gun->SwitchOptic();
+	AnimIK->CycledOptic();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 

@@ -23,6 +23,10 @@ class PROCEDURAL_AIM_API ABaseWeapon : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Optic", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* CurrentOptic;
+
+	uint8 OpticIndex;
+	
+	class UIKAnimInstance* IKAnim;
 public:	
 	// Sets default values for this actor's properties
 	ABaseWeapon();
@@ -30,11 +34,12 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+private:
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	void SwitchOptic();
 	FORCEINLINE UStaticMeshComponent* GetCurrentOptic() const { return CurrentOptic; }
 		 
 };

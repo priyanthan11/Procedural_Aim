@@ -52,9 +52,14 @@ public:
 protected:
 
 	UIKAnimInstance* AnimIK;
+
 	UFUNCTION(BlueprintCallable, Category = "Aiming")
-		void SetAiming(bool IsAiming);
+	void SetAiming(bool IsAiming);
 	bool bIsAiming;
+
+	UFUNCTION(BlueprintCallable, Category = "Aiming")
+		void CycleOptic();
+
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);

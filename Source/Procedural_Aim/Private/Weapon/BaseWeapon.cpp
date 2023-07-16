@@ -2,7 +2,9 @@
 
 
 #include "Weapon/BaseWeapon.h"
-
+#include "IKAnimInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "Procedural_Aim/Procedural_AimCharacter.h"
 // Sets default values
 ABaseWeapon::ABaseWeapon()
 {
@@ -17,15 +19,25 @@ ABaseWeapon::ABaseWeapon()
 	RootComponent = WeaponMesh;
 	Sight->AttachToComponent(WeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("S_Sight"));*/
 
+	OpticIndex = 0;
 
-
-
+	
 }
 
 // Called when the game starts or when spawned
 void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+	
+}
+
+void ABaseWeapon::SwitchOptic()
+{
+	if (++OpticIndex >= Optics.Num())
+	{
+		OpticIndex = 0;
+	}
+	CurrentOptic = Optics[OpticIndex];
 	
 }
 

@@ -29,15 +29,24 @@ public:
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand")
 			FTransform SightTransform;
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand")
+			FTransform FinalHandTransform;
+
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand")
 			float AimAlpha;
 
 		bool bInterpAiming;
 		bool bIsAiming;
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand")
+		bool bInterpRelativeHand;
 protected:
 	void setSightTransform();
 	void setRelativeHandTransform();
+	void setFinalHandTransform();
 	void interpAiming();
+	void interpRelativehand();
 
 public:
 	void SetAiming(bool IsAiming);
+
+	void CycledOptic();
 };
