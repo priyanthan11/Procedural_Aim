@@ -35,9 +35,11 @@ public:
 			float AimAlpha;
 
 		bool bInterpAiming;
+		
 		bool bIsAiming;
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand")
 		bool bInterpRelativeHand;
+		
 protected:
 	void setSightTransform();
 	void setRelativeHandTransform();

@@ -45,6 +45,12 @@ class AProcedural_AimCharacter : public ACharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ABaseWeapon>DefaultWeaponClass;
 
+	/* Montage for firing weapon */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+		class UAnimMontage* HipFireMontage;
+
+
+
 public:
 	AProcedural_AimCharacter();
 	
@@ -53,13 +59,28 @@ protected:
 
 	UIKAnimInstance* AnimIK;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UFUNCTION(BlueprintCallable, Category = "Aiming")
 	void SetAiming(bool IsAiming);
+	UPROPERTY(ReplicatedUsing = OnRep_IsAiming)
 	bool bIsAiming;
+	UFUNCTION()
+	void OnRep_IsAiming();
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SetAiming(bool IsAiming);
+	bool Server_SetAiming_Validate(bool IsAiming);
+	void Server_SetAiming__Implementation(bool IsAiming);
+
+
+
 
 	UFUNCTION(BlueprintCallable, Category = "Aiming")
-		void CycleOptic();
+	void CycleOptic();
 
+
+	void PlayFireSound();
+	void PlayGunFireMontage();
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -69,6 +90,7 @@ protected:
 
 	ABaseWeapon* SpawnDefaultWeapon();
 	void EquipWeapon(ABaseWeapon* WeaponToEquipped);
+	UFUNCTION(BlueprintCallable, Category = "Gun")
 	void Fire();
 			
 

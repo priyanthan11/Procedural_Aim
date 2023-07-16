@@ -12,6 +12,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Weapon/BaseWeapon.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Net/UnrealNetwork.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -149,6 +152,28 @@ void AProcedural_AimCharacter::SetAiming(bool IsAiming)
 	{
 		AnimIK->SetAiming(bIsAiming);
 	}
+	if (!HasAuthority())
+	{
+		Server_SetAiming(IsAiming);
+	}
+}
+
+void AProcedural_AimCharacter::OnRep_IsAiming()
+{
+	if (AnimIK)
+	{
+		AnimIK->SetAiming(bIsAiming);
+	}
+}
+
+bool AProcedural_AimCharacter::Server_SetAiming_Validate(bool IsAiming)
+{
+	return true;
+}
+
+void AProcedural_AimCharacter::Server_SetAiming_Implementation(bool IsAiming)
+{
+	SetAiming(IsAiming);
 }
 
 ABaseWeapon* AProcedural_AimCharacter::SpawnDefaultWeapon()
@@ -178,7 +203,39 @@ void AProcedural_AimCharacter::EquipWeapon(ABaseWeapon* WeaponToEquipped)
 
 void AProcedural_AimCharacter::Fire()
 {
+	if (TP_Gun == nullptr) return;
 	
+	PlayFireSound();
+
+}
+
+void AProcedural_AimCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME_CONDITION(AProcedural_AimCharacter, bIsAiming,COND_SkipOwner);
+
+}
+
+void AProcedural_AimCharacter::PlayFireSound()
+{
+	
+	if (TP_Gun->GetFireSound())
+	{
+		UGameplayStatics::PlaySound2D(this, TP_Gun->GetFireSound());
+	}
+
+
+}
+
+void AProcedural_AimCharacter::PlayGunFireMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HipFireMontage)
+	{
+		AnimInstance->Montage_Play(HipFireMontage);
+		AnimInstance->Montage_JumpToSection(FName("StartFire"));
+	}
 }
 
 
