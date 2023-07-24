@@ -30,9 +30,13 @@ public:
 			FTransform SightTransform;
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand")
 			FTransform FinalHandTransform;
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand")
+			FTransform LeftHandTransform;
 
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand")
 			float AimAlpha;
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand")
+			float ReloadAlpha;
 
 		bool bInterpAiming;
 		
@@ -46,9 +50,15 @@ protected:
 	void setFinalHandTransform();
 	void interpAiming();
 	void interpRelativehand();
+	void setLeftHandIK();
+
 
 public:
 	void SetAiming(bool IsAiming);
 
 	void CycledOptic();
+	
+	void Reload();
+	UFUNCTION(BlueprintCallable, Category = "Gun")
+	void StopReload();
 };

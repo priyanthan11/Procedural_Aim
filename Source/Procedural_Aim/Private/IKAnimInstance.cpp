@@ -14,6 +14,7 @@ UIKAnimInstance::UIKAnimInstance()
 	bInterpAiming = false;
 	bIsAiming = false;
 	bInterpRelativeHand = false;
+	ReloadAlpha = 1.f;
 }
 
 void UIKAnimInstance::NativeBeginPlay()
@@ -24,6 +25,7 @@ void UIKAnimInstance::NativeBeginPlay()
 	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), );
 	//BaseWeapon = Character->GetBaseWeapon();
 	
+
 	if (Character)
 	{
 		FTimerHandle TSetSightTransform;
@@ -33,6 +35,7 @@ void UIKAnimInstance::NativeBeginPlay()
 		GetWorld()->GetTimerManager().SetTimer(TSetRelativeHandTransform, this, &UIKAnimInstance::setRelativeHandTransform, 0.3f, true);
 
 	}
+	
 }
 
 void UIKAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -49,7 +52,7 @@ void UIKAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		interpRelativehand();
 	}
-	
+	setLeftHandIK();
 }
 
 void UIKAnimInstance::setSightTransform()
@@ -57,16 +60,16 @@ void UIKAnimInstance::setSightTransform()
 	FTransform CamTransform = Character->GetFollowCamera()->GetComponentTransform();
 	FTransform MeshTransform = Character->GetMesh()->GetComponentTransform();
 
-	FTransform Relative = UKismetMathLibrary::MakeRelativeTransform(CamTransform, MeshTransform);
+	SightTransform = UKismetMathLibrary::MakeRelativeTransform(CamTransform, MeshTransform);
 	
-	FVector NewSightVector = Relative.GetLocation();
+	/*FVector NewSightVector = Relative.GetLocation();
 	FVector FowVector = Relative.GetRotation().GetForwardVector();
 	FowVector *= 30.f;
 
-	NewSightVector += FowVector;
+	NewSightVector += FowVector;*/
 
-	SightTransform.SetLocation(NewSightVector);
-	SightTransform.SetRotation(Relative.Rotator().Quaternion());
+	SightTransform.SetLocation(SightTransform.GetLocation() + SightTransform.GetRotation().Vector() * 30.f);
+
 
 
 }
@@ -117,6 +120,16 @@ void UIKAnimInstance::interpRelativehand()
 	}
 }
 
+void UIKAnimInstance::setLeftHandIK()
+{
+	FTransform GunSocketTransform = Character->GetBaseWeapon()->GetWeaponMesh()->GetSocketTransform(FName("S_LeftHand"));
+	FTransform MeshTransform = Character->GetMesh()->GetSocketTransform(FName("hand_r"));
+	
+	LeftHandTransform = UKismetMathLibrary::MakeRelativeTransform(GunSocketTransform, MeshTransform);
+
+
+}
+
 void UIKAnimInstance::SetAiming(bool IsAiming)
 {
 	if (bIsAiming != IsAiming)
@@ -130,4 +143,21 @@ void UIKAnimInstance::CycledOptic()
 {
 	setFinalHandTransform();
 	bInterpRelativeHand = true;
+}
+
+void UIKAnimInstance::Reload()
+{
+	if (ReloadAlpha == 1.0f)
+	{
+		ReloadAlpha = 0.0f;
+	}
+	else if(ReloadAlpha == 0.0f)
+	{
+		ReloadAlpha = 1.0f;
+	}
+}
+
+void UIKAnimInstance::StopReload()
+{
+	ReloadAlpha = 1.0f;
 }

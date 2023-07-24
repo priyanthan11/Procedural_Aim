@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+
 #include "Procedural_AimCharacter.generated.h"
 
 class UIKAnimInstance;
@@ -47,9 +48,7 @@ class AProcedural_AimCharacter : public ACharacter
 
 	/* Montage for firing weapon */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-		class UAnimMontage* HipFireMontage;
-
-
+	class UAnimMontage* FireMontage;
 
 public:
 	AProcedural_AimCharacter();
@@ -63,23 +62,26 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Aiming")
 	void SetAiming(bool IsAiming);
+
 	UPROPERTY(ReplicatedUsing = OnRep_IsAiming)
 	bool bIsAiming;
+
 	UFUNCTION()
 	void OnRep_IsAiming();
+
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SetAiming(bool IsAiming);
 	bool Server_SetAiming_Validate(bool IsAiming);
-	void Server_SetAiming__Implementation(bool IsAiming);
-
-
-
+	//void Server_SetAiming__Implementation(bool IsAiming);
+	
 
 	UFUNCTION(BlueprintCallable, Category = "Aiming")
 	void CycleOptic();
 
+	UFUNCTION(BlueprintCallable, Category = "Aiming")
+	void Reload();
 
-	void PlayFireSound();
+	UFUNCTION(BlueprintCallable, Category = "Aiming")
 	void PlayGunFireMontage();
 
 	/** Called for movement input */

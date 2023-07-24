@@ -56,6 +56,7 @@ AProcedural_AimCharacter::AProcedural_AimCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 	bIsAiming = false;
+
 }
 
 void AProcedural_AimCharacter::BeginPlay()
@@ -75,14 +76,13 @@ void AProcedural_AimCharacter::BeginPlay()
 	EquipWeapon(SpawnDefaultWeapon());
 
 	AnimIK = Cast<UIKAnimInstance>(GetMesh()->GetAnimInstance());
-
 	
 
-	
 }
 
 void AProcedural_AimCharacter::CycleOptic()
 {
+	
 	TP_Gun->SwitchOptic();
 	AnimIK->CycledOptic();
 }
@@ -166,6 +166,8 @@ void AProcedural_AimCharacter::OnRep_IsAiming()
 	}
 }
 
+
+
 bool AProcedural_AimCharacter::Server_SetAiming_Validate(bool IsAiming)
 {
 	return true;
@@ -205,7 +207,8 @@ void AProcedural_AimCharacter::Fire()
 {
 	if (TP_Gun == nullptr) return;
 	
-	PlayFireSound();
+	TP_Gun->FireWeapon();
+	PlayGunFireMontage();
 
 }
 
@@ -217,24 +220,38 @@ void AProcedural_AimCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 
 }
 
-void AProcedural_AimCharacter::PlayFireSound()
-{
-	
-	if (TP_Gun->GetFireSound())
-	{
-		UGameplayStatics::PlaySound2D(this, TP_Gun->GetFireSound());
-	}
-
-
-}
-
 void AProcedural_AimCharacter::PlayGunFireMontage()
 {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && HipFireMontage)
+	if (FireMontage != nullptr)
 	{
-		AnimInstance->Montage_Play(HipFireMontage);
-		AnimInstance->Montage_JumpToSection(FName("StartFire"));
+		UE_LOG(LogTemp, Warning, TEXT("FireMontage is Valid"));
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance != nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AnimInstance is Valid"));
+			AnimInstance->Montage_Play(FireMontage, 1.f);
+			AnimInstance->Montage_JumpToSection(FName("StartFire"));
+		}
+	}
+	
+}
+void AProcedural_AimCharacter::Reload()
+{
+	if (FireMontage != nullptr)
+	{
+		// Get the animation object for the character mesh
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance != nullptr)
+		{
+			AnimInstance->Montage_Play(FireMontage, 1.f);
+			AnimInstance->Montage_JumpToSection(FName("Reload"));
+			
+		}
+
+	}
+	if (AnimIK)
+	{
+		AnimIK->Reload();
 	}
 }
 
