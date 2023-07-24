@@ -243,7 +243,7 @@ void AProcedural_AimCharacter::Reload()
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance != nullptr)
 		{
-			AnimInstance->Montage_Play(FireMontage, 1.f);
+			AnimInstance->Montage_Play(ReloadMontage, 1.f);
 			AnimInstance->Montage_JumpToSection(FName("Reload"));
 			
 		}

@@ -49,6 +49,10 @@ class AProcedural_AimCharacter : public ACharacter
 	/* Montage for firing weapon */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	class UAnimMontage* FireMontage;
+	/* Montage for Reloading weapon */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+		class UAnimMontage* ReloadMontage;
+
 
 public:
 	AProcedural_AimCharacter();
